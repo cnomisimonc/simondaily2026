@@ -349,6 +349,21 @@ html[data-theme="dark"] .genline{color:var(--muted)}
 .rd-essaylink span{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);margin-top:2px}
 .rd-essaylink.back{margin-top:18px;border:1px solid var(--rule);border-radius:9px;padding:10px 12px;color:var(--gold);font-weight:600}
 .arow-essay{color:var(--gold);font-size:13px}
+
+/* --- mobile bottom tab bar --- */
+.botnav{display:none}
+@media(max-width:860px){
+  .botnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;justify-content:space-around;
+    background:color-mix(in srgb,var(--surface) 95%,transparent);backdrop-filter:blur(12px);
+    border-top:1px solid var(--rule);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px))}
+  .botnav a{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;
+    color:var(--muted);font-size:9.5px;font-family:var(--mono);letter-spacing:.02em;padding:4px 1px;border-radius:9px}
+  .botnav a svg{width:21px;height:21px}
+  .botnav a.active{color:var(--gold)}
+  .botnav a.active svg{stroke:var(--gold)}
+  body{padding-bottom:66px}
+  .foot{padding-bottom:80px}
+}
 </style>
 </head>
 <body>
@@ -1210,9 +1225,11 @@ html[data-theme="dark"] .genline{color:var(--muted)}
   <div class="foot-in">
     <div class="foot-brand"><b>Simon's Daily</b> · Heyokha Brothers</div>
     <p class="disclaimer">Commentary, not investment advice. Heyokha Brothers and the author hold positions across many of the names and themes discussed. Figures are as cited by the author within the column on the dates shown.</p>
-    <p class="genline">This dashboard rebuilds itself automatically as new entries are written. Last generated 25 Jul 2026, 21:53 HKT · through Day 71.</p>
+    <p class="genline">This dashboard rebuilds itself automatically as new entries are written. Last generated 25 Jul 2026, 22:05 HKT · through Day 71.</p>
   </div>
 </footer>
+
+<nav class="botnav" aria-label="Sections"><a href="#journey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h6a4 4 0 0 0 0-8H10a4 4 0 0 1 0-8h4"/></svg><span>Journey</span></a><a href="#metrics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 3 4-6"/></svg><span>Numbers</span></a><a href="#themes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Themes</span></a><a href="#calls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Calls</span></a><a href="#philosophy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Essays</span></a><a href="#archive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3.5" y1="6" x2="3.51" y2="6"/><line x1="3.5" y1="12" x2="3.51" y2="12"/><line x1="3.5" y1="18" x2="3.51" y2="18"/></svg><span>Archive</span></a></nav>
 
 <div id="reader" class="reader" hidden>
   <div class="reader-scrim" data-close></div>
@@ -1421,11 +1438,16 @@ html[data-theme="dark"] .genline{color:var(--muted)}
   });
 
   /* ---------- active nav on scroll ---------- */
-  var navlinks=$$(".topnav a"); var secs=navlinks.map(function(a){return $(a.getAttribute("href"));});
+  var topLinks=$$(".topnav a"); var allnav=$$(".topnav a, .botnav a");
+  var secs=topLinks.map(function(a){return $(a.getAttribute("href"));});
   var obs=new IntersectionObserver(function(es){
     es.forEach(function(en){ if(en.isIntersecting){
       var id="#"+en.target.id;
-      navlinks.forEach(function(a){a.style.color=a.getAttribute("href")===id?"var(--gold)":"";});
+      allnav.forEach(function(a){
+        var on=a.getAttribute("href")===id;
+        if(a.parentNode && a.parentNode.classList.contains("botnav")){a.classList.toggle("active",on);}
+        else {a.style.color=on?"var(--gold)":"";}
+      });
     }});
   },{rootMargin:"-45% 0px -50% 0px"});
   secs.forEach(function(s){s&&obs.observe(s);});
