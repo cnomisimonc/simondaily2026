@@ -364,6 +364,53 @@ html[data-theme="dark"] .genline{color:var(--muted)}
   body{padding-bottom:66px}
   .foot{padding-bottom:80px}
 }
+
+/* ---------- reader: Save-as-PDF button ---------- */
+.reader-print{position:sticky;float:right;top:0;margin:-6px 8px 0 0;height:38px;padding:0 13px;
+  border-radius:9px;border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);
+  font-family:var(--sans);font-size:12.5px;font-weight:600;line-height:1;cursor:pointer;z-index:2;
+  display:inline-flex;align-items:center;transition:.15s;white-space:nowrap}
+.reader-print:hover{color:var(--ink);border-color:var(--gold)}
+
+/* ---------- print: a clean PDF of the open archive entry / essay ---------- */
+@media print{
+  @page{ margin:16mm 15mm; }
+  html,body{ background:#fff !important; }
+  /* Show only the open reader entry; hide the rest of the app. */
+  body.printing > *:not(.reader){ display:none !important; }
+  body.printing .reader{ position:static !important; display:block !important; inset:auto !important;
+    height:auto !important; overflow:visible !important; }
+  body.printing .reader-scrim,
+  body.printing .reader-x,
+  body.printing .reader-print,
+  body.printing .rd-nav,
+  body.printing .rd-companion,
+  body.printing .rd-essaylink{ display:none !important; }
+  body.printing .reader-panel{
+    position:static !important; width:100% !important; max-width:none !important;
+    height:auto !important; max-height:none !important; overflow:visible !important;
+    box-shadow:none !important; border:0 !important; border-radius:0 !important;
+    padding:0 !important; margin:0 !important; background:#fff !important; }
+  /* Paper typography (ignore dark theme). */
+  body.printing #readerBody{ color:#161310 !important; }
+  body.printing .rd-kick{ color:#8a6412 !important; }
+  body.printing .rd-title{ color:#161310 !important; font-size:24pt; margin:6px 0 8px; }
+  body.printing .rd-quad{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body.printing .rd-meta{ color:#575048 !important; }
+  body.printing .rd-dek{ color:#332f28 !important; }
+  body.printing .rd-quote{ color:#2a2620 !important; }
+  body.printing .rd-keynums{ background:#f5f2ea !important; border:1px solid #e2dccd !important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body.printing .knum b{ color:#161310 !important; }
+  body.printing .rd-body{ color:#1a1712 !important; font-size:11.5pt; line-height:1.62; }
+  body.printing .rd-body a{ color:#1a1712 !important; text-decoration:none; }
+  body.printing .rd-body h3.sec{ color:#8a6412 !important; break-after:avoid; page-break-after:avoid; }
+  body.printing .rd-sources{ font-size:9pt; color:#4a443c !important; }
+  body.printing .rd-quote, body.printing .rd-keynums, body.printing .rd-sources,
+  body.printing .rd-body h3.sec, body.printing .rd-body h4.subsec{ break-inside:avoid; page-break-inside:avoid; }
+  /* Keep source links usable on paper. */
+  body.printing .rd-sources a::after{ content:" (" attr(href) ")"; font-size:8pt; color:#777; word-break:break-all; }
+}
 </style>
 </head>
 <body>
@@ -1232,7 +1279,7 @@ html[data-theme="dark"] .genline{color:var(--muted)}
   <div class="foot-in">
     <div class="foot-brand"><b>Simon's Daily</b> · Heyokha Brothers</div>
     <p class="disclaimer">Commentary, not investment advice. Heyokha Brothers and the author hold positions across many of the names and themes discussed. Figures are as cited by the author within the column on the dates shown.</p>
-    <p class="genline">This dashboard rebuilds itself automatically as new entries are written. Last generated 26 Jul 2026, 12:01 HKT · through Day 72.</p>
+    <p class="genline">This dashboard rebuilds itself automatically as new entries are written. Last generated 26 Jul 2026, 12:14 HKT · through Day 72.</p>
   </div>
 </footer>
 
@@ -1242,6 +1289,7 @@ html[data-theme="dark"] .genline{color:var(--muted)}
   <div class="reader-scrim" data-close></div>
   <article class="reader-panel" role="dialog" aria-modal="true">
     <button class="reader-x" data-close aria-label="Close">✕</button>
+    <button class="reader-print" data-print aria-label="Save as PDF" title="Save this entry as a nicely formatted PDF">⤓&nbsp;Save&nbsp;as&nbsp;PDF</button>
     <div id="readerBody"></div>
   </article>
 </div>
@@ -1390,6 +1438,12 @@ html[data-theme="dark"] .genline{color:var(--muted)}
     });
   }
   function closeReader(){reader.hidden=true; document.body.style.overflow="";}
+  function printEntry(){
+    if(reader.hidden) return;
+    document.body.classList.add("printing");
+    window.print();
+  }
+  window.addEventListener("afterprint",function(){document.body.classList.remove("printing");});
   function openEssay(slug){
     var e=bySlug[slug]; if(!e) return; curDay=null;
     var pq=e.pull_quote?'<blockquote class="rd-quote">“'+esc(e.pull_quote)+'”</blockquote>':'';
@@ -1405,6 +1459,7 @@ html[data-theme="dark"] .genline{color:var(--muted)}
     reader.querySelector(".reader-panel").scrollTop=0;
   }
   document.addEventListener("click",function(ev){
+    if(ev.target.closest("[data-print]")){printEntry();return;}
     var card=ev.target.closest(".escard"); if(card){openEssay(card.getAttribute("data-essay"));return;}
     var goe=ev.target.closest("[data-essay-open]"); if(goe){openEssay(goe.getAttribute("data-essay-open"));return;}
     var god=ev.target.closest("[data-day-open]"); if(god){openDay(parseInt(god.getAttribute("data-day-open"),10));return;}
